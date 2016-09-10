@@ -3,7 +3,9 @@ package net.karrer.klionewsletter;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -28,6 +30,7 @@ import javafx.stage.Stage;
 @SuppressWarnings("restriction")
 public final class KlioNewsletter extends Application {
  
+    private static final String DEBUG_DIR = "c:/temp/klio";
     private Desktop desktop = Desktop.getDesktop();
     final TextArea msgArea = new TextArea();
     final Button saveButton = new Button("Save as ...");
@@ -47,8 +50,19 @@ public final class KlioNewsletter extends Application {
         final TextField csvfFileField = new TextField();
         final TextField outfFileField = new TextField();
         
-        File defaultDirectory = new File("c:/temp/klio");        
-
+        // find the directory where the jar file is (except when debugging)
+        String jarDir;
+        try {
+          jarDir = KlioNewsletter.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()
+              .replaceFirst("^/(?=\\w:)", "").replaceFirst("/[^/]+$", "");
+          if (jarDir.contains("target/classes")) {
+            jarDir = DEBUG_DIR;
+          }
+        } catch (URISyntaxException e3) {
+          jarDir = DEBUG_DIR;
+        }
+        File defaultDirectory = new File(jarDir);
+        
  
         openDocxButton.setOnAction(
             new EventHandler<ActionEvent>() {
@@ -60,7 +74,7 @@ public final class KlioNewsletter extends Application {
                       new ExtensionFilter("Word docx Files", "*.docx"), new ExtensionFilter("All Files", "*.*"));
                     docxFile = fileChooser.showOpenDialog(stage);
                     if (docxFile != null) {
-                      openFile("Template", docxFile, docxFileField);
+                      openFile("Template", docxFile, docxFileField, "read");
                       if (csvfFile != null) {
                         doConversion();
                       }
@@ -79,7 +93,7 @@ public final class KlioNewsletter extends Application {
 
                     csvfFile = fileChooser.showOpenDialog(stage);
                     if (csvfFile != null) {
-                      openFile("Export", csvfFile, csvfFileField);
+                      openFile("Export", csvfFile, csvfFileField, "read");
                       if (docxFile != null) {
                         doConversion();
                       }
@@ -98,10 +112,9 @@ public final class KlioNewsletter extends Application {
                       new ExtensionFilter("Word docx Files", "*.docx"));
                   File outfFile = fileChooser.showSaveDialog(stage);
                   if (outfFile != null) {
-                      openFile("Output", outfFile, outfFileField);
                       try {
-                        Files.move(tempFile, Paths.get(outfFile.getPath()), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                        msg("Output file '" + outfFile.getPath() + "' written\n");
+                        Files.move(tempFile, Paths.get(outfFile.getPath()), StandardCopyOption.REPLACE_EXISTING);
+                        openFile("Output", outfFile, outfFileField, "written");
                       } catch (IOException e1) {
                         msg("Error, cannot write " + outfFile.getPath()+"\n"+e+"\n");
                         System.err.println("Error, cannot write " + outfFile.getPath() + "\n" + e);
@@ -142,8 +155,8 @@ public final class KlioNewsletter extends Application {
       msgArea.appendText(mgs);
     }
  
-    private void openFile(String desc, File file, TextField fld) {
-      msg(desc + " file "+ file.getPath() + " opened\n");
+    private void openFile(String desc, File file, TextField fld, String action) {
+      msg(desc + " file "+ file.getPath() + " " + action + "\n");
       fld.setText(file.getPath());
     }
     
