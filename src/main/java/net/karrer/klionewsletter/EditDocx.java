@@ -1,5 +1,6 @@
 package net.karrer.klionewsletter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,20 +19,31 @@ import org.xml.sax.SAXException;
 
 public class EditDocx {
 	
-	private static String TITLE_MARKER = "TITEL";
-	private static String REFERENCES_MARKER = "REFS";
+  private static final String TITLE_MARKER = "TITEL";
+	private static final String REFERENCES_MARKER = "REFS";
 	
-    public static void main(String [] args) throws IOException, ParserConfigurationException, SAXException, TransformerFactoryConfigurationError, TransformerException {
-    	if (args.length < 3) {
-    		System.err.println("Usage: $0 in.docx artikelexport.csv out.docx");
-    		System.exit(1);
-    	}
-    	Path inZip = Paths.get(args[0]);
-    	Path csvFile = Paths.get(args[1]);
-    	Path outZip = Paths.get(args[2]); 
-    	
+	private Path inZip;
+	private Path csvFile;
+	private String errmsg = null;
+	private String infomsg = "";
+//	
+//    public static void main(String [] args) throws IOException, ParserConfigurationException, SAXException, TransformerFactoryConfigurationError, TransformerException {
+//    	if (args.length < 3) {
+//    		System.err.println("Usage: $0 in.docx artikelexport.csv out.docx");
+//    		System.exit(1);
+//    	}
+	
+	public EditDocx(File df, File cf) {
+    // Constructor
+    // Switch to nio
+    	this.inZip = Paths.get(df.getPath());
+    	this.csvFile = Paths.get(cf.getPath());
     	// This is used in the Collator for TreeSets
-    	Locale.setDefault(new Locale("de", "CH"));
+    	Locale.setDefault(new Locale("de", "ch"));    	
+	}
+    	
+   public Path convert() throws IOException { 	
+    	Path outZip = Files.createTempFile("Klio", "docx");
     	
     	// read in the csv file, might have errors
     	ExportArtikelFile artikelFile = new ExportArtikelFile(csvFile);
@@ -40,14 +52,20 @@ public class EditDocx {
     	// make a copy of the Vorlage file and work with that
     	Files.copy(inZip, outZip, StandardCopyOption.REPLACE_EXISTING);
     	
-    	DocxFile wordFile = new DocxFile(outZip);
+    	DocxFile wordFile;
+      try {
+        wordFile = new DocxFile(outZip);
+      } catch (ParserConfigurationException | SAXException e) {
+        errmsg = "error reading .docx file, " + e + "\n";
+        return null;
+      }
     	
     	String docX = wordFile.getDocumentXml();
     	
     	for (String titl : artikelFile.getZwischenTitel()) {
     		docX = replaceTitel(docX, titl);
     		docX = replaceRefs(docX, artikelFile.getReferences(titl), wordFile);
-    		System.err.println("Wrote " + titl + ", doc length now=" + docX.length());
+    		infomsg += "  Zwischentitel '" + titl + "', doc length now=" + docX.length() + "\n";
     	}
     	
     	wordFile.setDocumentXml(docX);
@@ -64,10 +82,16 @@ public class EditDocx {
 //        }
 		
         
-        wordFile.close();		
+        try {
+          wordFile.close();
+        } catch (TransformerFactoryConfigurationError | TransformerException e) {
+          errmsg = "Error transforming .docx file" + e + "\n";
+          return null;
+        }
+        return outZip;
     }
 
-	private static String replaceRefs(String docX, TreeSet<String> references, DocxFile wordFile) {
+	private String replaceRefs(String docX, TreeSet<String> references, DocxFile wordFile) {
 //      <w:p>
 //        <w:pPr>
 //          <w:pStyle w:val="Normal"/><w:spacing w:before="0" w:after="0"/><w:ind w:left="227" w:right="0" w:hanging="227"/><w:rPr><w:lang w:val="de-CH"/></w:rPr>
@@ -118,15 +142,24 @@ public class EditDocx {
 	    		return str;
 	    	}
 	    }
-	    System.err.println("Cannot find a paragraph with a " + REFERENCES_MARKER + " marker");
-	    System.exit(1);
+	    errmsg = "Cannot find a paragraph with a " + REFERENCES_MARKER + " marker";
 	    return null;
 //	    System.err.println("Start:"+matcher.start()+", end:"+matcher.end()
 //	    +", g1:"+matcher.group(1).length()+", g2:"+matcher.group(2).length()+", g3:"+matcher.group(3).length());
 	}
 
-	private static String replaceTitel(String docX, String titl) {
+	private String replaceTitel(String docX, String titl) {
     	System.err.println("  Added titel " + titl);
 		return docX.replaceFirst("<w:t>" + TITLE_MARKER +"</w:t>",  "<w:t>" + titl + "</w:t>");
 	}
+	
+  public String getError() {
+    return errmsg;
+  }
+
+
+  public String getInfo() {
+    return infomsg;
+  }
+
 }

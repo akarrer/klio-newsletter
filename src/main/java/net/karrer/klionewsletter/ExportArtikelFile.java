@@ -82,7 +82,7 @@ public class ExportArtikelFile {
 	 * Returns the formatted bibliographic references after a Zwischentitel, sorted
 	 * 
 	 * @param zwischenTitel
-	 * @return the sorted set of references that belong to the zwischenTitel
+	 * @return the sorted references after the zwischentitel
 	 */
 	public TreeSet<String> getReferences(String zwischenTitel) {
 		return references.get(zwischenTitel);
@@ -90,7 +90,7 @@ public class ExportArtikelFile {
 
 	/**
 	 * Returns the list of Zwischentitel in the order as in the input file
-	 * @return the list of zwischenTitel
+	 * @return the list of Zwischentitel 
 	 */
 	public List<String> getZwischenTitel() {
 		return zwischenTitel;

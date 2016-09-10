@@ -111,7 +111,7 @@ public class DocxFile {
 	 * and returns the rid string (of the form "rId1234").
 	 * 
 	 * @param artikelNr
-	 * @return a new rId that is not yet present in the relationships file
+	 * @return
 	 */
 	public String addKlioArtikel(String artikelNr) {
 		Node relationships = relsDoc.getFirstChild();
