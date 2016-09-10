@@ -88,7 +88,7 @@ public class EditDocx {
           errmsg = "Error transforming .docx file" + e + "\n";
           return null;
         }
-        infomsg += "Looks ok. You can save this file now\n";
+        infomsg += "Looks ok.\n";
         return outZip;
     }
 
