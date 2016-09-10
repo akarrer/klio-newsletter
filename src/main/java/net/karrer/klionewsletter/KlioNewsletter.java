@@ -30,8 +30,8 @@ import javafx.stage.Stage;
 @SuppressWarnings("restriction")
 public final class KlioNewsletter extends Application {
  
-    private static final String DEBUG_DIR = "c:/temp/klio";
-    private Desktop desktop = Desktop.getDesktop();
+    private static final String DEBUG_DIR =
+    		(System.getProperty("os.name").equals("Linux")) ? "/home/karrer/klio-newsletter/data" : "c:/temp/klio";
     final TextArea msgArea = new TextArea();
     final Button saveButton = new Button("Save as ...");
     File docxFile;
@@ -44,11 +44,12 @@ public final class KlioNewsletter extends Application {
         stage.setTitle("KlioNewsletter");
         final Label title = new Label("Klio Newsletter");
         title.setFont(new Font("Arial", 24));
-        final Button openDocxButton = new Button("Newsletter-Kopf-Datei (.docx)");
-        final Button openCsvfButton = new Button("Artikel-Export-Datei   (.csv)");
+        final Button openDocxButton = new Button("Open Newsletter-Template (.docx)");
+        final Button openCsvfButton = new Button("Open Artikel-Export-File  (.csv)");
         final TextField docxFileField = new TextField();
         final TextField csvfFileField = new TextField();
         final TextField outfFileField = new TextField();
+        docxFileField.setMinWidth(500.0);
         
         // find the directory where the jar file is (except when debugging)
         String jarDir;
@@ -122,6 +123,8 @@ public final class KlioNewsletter extends Application {
                     }
                 }
             });
+        
+        msgArea.setMinSize(450.0, 450.0);
         saveButton.setDisable(true);
 
         final GridPane grid = new GridPane();
