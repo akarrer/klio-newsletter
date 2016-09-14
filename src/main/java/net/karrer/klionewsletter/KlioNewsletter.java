@@ -31,7 +31,7 @@ import javafx.stage.Stage;
 public final class KlioNewsletter extends Application {
  
     private static final String DEBUG_DIR =
-    		(System.getProperty("os.name").equals("Linux")) ? "/home/karrer/klio-newsletter/data" : "c:/temp/klio";
+    		(System.getProperty("os.name").equals("Linux")) ? "/home/karrer/klio-newsletter/data" : "C:/temp/klio";
     final TextArea msgArea = new TextArea();
     final Button saveButton = new Button("Save as ...");
     File docxFile;
