@@ -24,7 +24,7 @@ public class ExportArtikelFile {
 	private static String SEPARATOR_REGEX = "\\s*\\|\\s*";
 	
 	// Buarque, Chico: Mein deutscher Bruder. Roman. S. Fischer Frankfurt a.M. 2016, 256 S., gebunden, 24.- 
-	private static String REF_TEMPLATE = "{autor}: {titel}. {verlag}, {zusatz}, {preis2}=={aref}";
+	private static String REF_TEMPLATE = "{autor}: {titel}. {untertitel}. {verlag}, {zusatz}, {preis2}=={aref}";
 	
 	List<String> zwischenTitel;
 	Map<String, TreeSet<String>> references;
@@ -59,7 +59,7 @@ public class ExportArtikelFile {
 				// normal line. Fill the items into the template and store
 				String ref = REF_TEMPLATE;
 				for (int i = 0; i < items.length; i++) {
-					if ("titel".equalsIgnoreCase(header[i])) {
+					if ("titel".equalsIgnoreCase(header[i]) || "untertitel".equalsIgnoreCase(header[i])) {
 						items[i] = items[i].replaceFirst("\\.\\s*$", "");
 					}
 					ref = ref.replaceAll("\\{" + header[i] + "\\}", items[i]);
