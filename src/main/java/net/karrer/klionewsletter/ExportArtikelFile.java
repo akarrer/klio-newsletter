@@ -24,7 +24,8 @@ public class ExportArtikelFile {
 	private static String SEPARATOR_REGEX = "\\s*\\|\\s*";
 	
 	// Buarque, Chico: Mein deutscher Bruder. Roman. S. Fischer Frankfurt a.M. 2016, 256 S., gebunden, 24.- 
-	private static String REF_TEMPLATE = "{autor}: {titel} {untertitel} {verlag} {zusatz}, {preis}=={aref}";
+	// titel and untertitel have a dot appended
+	private static String REF_TEMPLATE = "{autor}: {titel} {untertitel} {verlag}, {zusatz}, {preis2}=={aref}";
 	
 	List<String> zwischenTitel;
 	Map<String, TreeSet<String>> references;
@@ -36,19 +37,10 @@ public class ExportArtikelFile {
 		zwischenTitel = new ArrayList<String>();
 		references = new HashMap<String, TreeSet<String>>();
 		Map<String, Integer> itemIndex = new HashMap<String, Integer>();
-		List<String> lines = Files.readAllLines(csvFile, StandardCharsets.ISO_8859_1);
+		List<String> lines = Files.readAllLines(csvFile, StandardCharsets.UTF_8);
 		String[] header = null;
 		String currentTitel = null;
 		for (String line : lines) {
-		  if (line.matches("\\s*") || line.startsWith("#")) {
-		    continue;
-		  }
-		  
-		  line = line.replaceAll("\\&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;");
-		             
-		  
 			String[] items = getCSVline(line);
 			
 			if (items[0].equalsIgnoreCase("aref")) {
@@ -65,12 +57,10 @@ public class ExportArtikelFile {
 				zwischenTitel.add(currentTitel);
 				references.put(currentTitel, new TreeSet<String>(Collator.getInstance()));
 			} else {
-				// normal line. Fill the items into the template and store.
-				// make sure titel and untertitel ends in "."
+				// normal line. Fill the items into the template and store
 				String ref = REF_TEMPLATE;
-				for (int i = 0; i < Math.min(items.length, header.length); i++) {
-					if (items[i].length() > 2 && 
-							("titel".equalsIgnoreCase(header[i]) || "untertitel".equalsIgnoreCase(header[i]))) {
+				for (int i = 0; i < items.length; i++) {
+					if (items[i].length() > 2 && ("titel".equalsIgnoreCase(header[i]) || "untertitel".equalsIgnoreCase(header[i]))) {
 						items[i] = items[i].replaceFirst("\\.\\s*$", ".");
 					}
 					ref = ref.replaceAll("\\{" + header[i] + "\\}", items[i]);
