@@ -1,13 +1,12 @@
 package net.karrer.klionewsletter;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -18,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -31,7 +29,7 @@ import javafx.stage.Stage;
 public final class KlioNewsletter extends Application {
  
     private static final String DEBUG_DIR =
-    		(System.getProperty("os.name").equals("Linux")) ? "/home/karrer/klio-newsletter/data" : "C:/temp/klio";
+    		(System.getProperty("os.name").equals("Linux")) ? "/home/karrer/klio-newsletter/data" : "c:/temp/klio";
     final TextArea msgArea = new TextArea();
     final Button saveButton = new Button("Save as ...");
     File docxFile;
